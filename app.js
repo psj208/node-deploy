@@ -61,7 +61,7 @@ if(process.env.NODE_ENV === 'production'){
   // proxy:true https 적용을위해 노드서버 앞에 다른 서버를 두었을때
   // cookie.secure:true 로드밸런싱(요청부하분산)등을 위해
   sessionOption.proxy = true;
-  sessionOption.cookie.secure = true;
+  // sessionOption.cookie.secure = true;
 }
 const sessionMiddleware = session(sessionOption);
 app.use(sessionMiddleware);
