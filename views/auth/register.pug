@@ -1,0 +1,55 @@
+extends ../layout
+
+block content
+
+  form.form-signin(action='/auth/register/', method='post', novalidate='')
+    .mb-4.text-center
+      h1.h3.mb-4.font-weight-normal REGISTER
+      p
+        | Each required form group has a validation state that can be triggered by attempting to submit the form without completing it.
+    .mb-4
+      input.form-control(type='text', name='user', placeholder='ID', required='')
+      .invalid-feedback
+        | Valid ID is required
+    .mb-4
+      input.form-control(type='password', name='password', placeholder='Password', required='')
+      .invalid-feedback
+        | Valid password is required
+      small#passwordHelpInline.text-muted Must be 8-20 characters long.
+    .mb-4
+      .input-group
+        .input-group-prepend
+          span.input-group-text @
+        input.form-control(type='text', name='displayName', placeholder='DisplayName', required='')
+        .invalid-feedback(style='width: 100%;')
+          | Your displayName is required.
+    hr.mb-4
+    button.btn.btn-lg.btn-outline-primary.btn-block(type='submit') Submit
+
+    if joinError
+      .error-message= joinError
+
+
+  style.
+    .form-signin{
+    width: 100%;
+    max-width: 420px;
+    padding: 15px;
+    margin: auto;
+    }
+  script.
+    (function() {
+    'use strict';
+    window.addEventListener('load', function() {
+    var forms = document.getElementsByClassName('form-signin');
+    var validation = Array.prototype.filter.call(forms, function(form) {
+    form.addEventListener('submit', function(event) {
+    if (form.checkValidity() === false) {
+    event.preventDefault();
+    event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+    }, false);
+    });
+    }, false);
+    })();

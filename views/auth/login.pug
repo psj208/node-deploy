@@ -1,0 +1,31 @@
+extends ../layout
+
+block content
+  form.form-signin(action='/auth/login/' method='post')
+    .text-center.mb-4
+      h1.h3.mb-3.font-weight-normal LOGIN
+      p Features created with Passport.
+    .mb-4
+      input#input.form-control(type='input',name='user', placeholder='ID', required='', autofocus='')
+    .mb-4
+      input#inputPassword.form-control(type='password', name='password', placeholder='Password', required='')
+    hr.mb-4
+    button.btn.btn-lg.btn-outline-primary.btn-block(type='submit') Sign in
+    a.btn.btn-lg.btn-primary.btn-block(href='/auth/facebook') facebook
+    button.btn.btn-lg.btn-warning.btn-block(type='submit') kakao
+
+  .text-center
+    p 아이디가 없으시면,
+      a(href='/auth/register') 회원가입
+      | 하세요.
+
+
+
+
+  style.
+    .form-signin{
+    width: 100%;
+    max-width: 420px;
+    padding: 15px;
+    margin: auto;
+    }

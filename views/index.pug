@@ -1,0 +1,331 @@
+extends layout
+
+block content
+  .px-3.py-3.pt-md-5.pb-md-4.mx-auto.text-center
+    h1.display-4
+      |HELLO,
+      if user
+        =user.displayName
+
+      else
+        |Guest
+    p.lead
+
+  .container
+    // h3.text-center chat
+    .messaging
+      .inbox_msg
+        .inbox_people
+          .headind_srch
+            .recent_heading
+              h4 Chat
+            .srch_bar
+              .stylish-input-group
+                i.fa.fa-pencil.fa-fw#room-form(aria-hidden='true')
+          .inbox_chat
+            for room in rooms
+              .chat_list(data-id=room._id)
+                .chat_people
+                  .chat_img
+                    img(src='https://ptetutorials.com/images/user-profile.png', alt='sunil')
+                  .chat_ib
+                    -var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September", "October", "November", "December"];
+                    h5
+                      | #{room.title}
+                      span.chat_date #{monthNames[room.createdAt.getMonth()]} #{room.createdAt.getDate()}
+                    p
+                      | 채팅내용
+
+
+        .mesgs
+          .msg_history#chatLogs
+            .msg_room_join
+              | 채팅방 접속해주세요.
+
+          .type_msg
+            .input_msg_write
+              form#chat-form(action='/chat' method='post' enctype='multipart/form-data')
+                input.write_msg(type='text', placeholder='Type a message' name='chat')
+                button.msg_send_btn(type='submit')
+                  i.fa.fa-paper-plane-o(aria-hidden='true')
+
+    script(src='/socket.io/socket.io.js')
+
+    // script(src='/javascripts/room.js')
+    ////////////////////// room //////////////////////
+    script.
+      var socket = io.connect('http://localhost:3000/room',{
+        path: '/socket.io'
+      });
+      socket.on('news',function(data){
+        console.log(data);
+      });
+      document.getElementById('room-form').addEventListener('click',function(){
+        var newTitle = prompt('방 제목 입력해주세요.');
+        if(!newTitle){
+          return alert('방 제목을 반드시 입력하셔야 합니다.');
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.onload = function(){
+          var room = JSON.parse(xhr.responseText);
+
+          if(xhr.status === 201){
+            [].forEach.call(document.getElementsByClassName('chat_list'),function(el) {
+               el.classList.remove("active_chat");
+            });
+
+            var inbox = document.querySelector('.inbox_chat');
+            var chat_list = document.createElement('div');
+            chat_list.setAttribute("class", "chat_list");
+            chat_list.classList.add('active_chat');
+
+            var chat_people = document.createElement('div');
+            chat_people.setAttribute("class", "chat_people");
+
+            var chat_img = document.createElement('div');
+            chat_img.setAttribute('class', 'chat_img');
+
+            var img = document.createElement('img');
+            src = 'https://ptetutorials.com/images/user-profile.png';
+            img.setAttribute('src',src);
+
+            chat_img.appendChild(img);
+
+            chat_people.appendChild(chat_img);
+
+            var chat_ib = document.createElement('div');
+            chat_ib.setAttribute('class','chat_ib');
+
+            var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September", "October", "November", "December"];
+            var d = new Date(room.createdAt);
+
+            chat_ib.innerHTML = '<h5>'+newTitle+'<span class="chat_date">'+monthNames[d.getMonth()]+' '+d.getDate()+'</span></h5><p>채팅내용</p>';
+            chat_people.appendChild(chat_ib);
+
+            chat_list.appendChild(chat_people);
+            inbox.appendChild(chat_list);
+            chat_list.classList.add('active_chat');
+
+            addJoinEvent(room._id); // 채팅접속
+
+          }else if(xhr.status === 202){
+            var e = JSON.parse(xhr.responseText);
+            return alert(e);
+          }else{
+            console.error(xhr.responseText);
+          }
+        };
+        xhr.open('POST','/chat/room');
+        xhr.setRequestHeader('Content-Type','application/json');
+        xhr.send(JSON.stringify({ title:newTitle }));
+      });
+
+
+
+
+    ////////////////////// chat //////////////////////
+    // script(src='/javascripts/chat.js')
+    script.
+      function outputDate(date){
+        var d = new Date(date);
+        var hour = d.getHours();
+        var minute = d.getMinutes();
+        var mon = d.getMonth();
+        var il = d.getDate();
+
+        var fulltime = "";
+        const arrayHrs = [12,1,2,3,4,5,6,7,8,9,10,11,12,1,2,3,4,5,6,7,8,9,10,11];
+        const arrayMonths = ["Jan", "Feb", "Mar", "April", "May", "June","July", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        if(minute < 10) {
+            minute = "0" + minute;
+        }
+        if( hour < 12) {
+            fulltime = arrayHrs[hour] + ":" + minute + " AM | "+arrayMonths[mon]+" "+il;
+        }
+        else {
+
+            fulltime = arrayHrs[hour] + ":" + minute + " PM | "+arrayMonths[mon]+" "+il;
+        }
+        return fulltime;
+      }
+
+      var chat = io.connect('http://localhost:3000/chat',{
+        path: '/socket.io'
+      });
+
+      chat.on('join',function(data){
+        // data.chat: "입장하셨습니다"
+        // data.user: "system"
+        // console.log("view쪽 join",data); // system 누구 입장 한거 표시
+        var chatLogs = document.getElementById("chatLogs");
+        var msg_system =document.createElement('div');
+        msg_system.setAttribute('class','msg_system');
+        msg_system.innerHTML = data.chat;
+
+
+        chatLogs.appendChild(msg_system);
+        var div = document.getElementById("chatLogs");
+        div.scrollTop = div.scrollHeight;
+      });
+      //채팅입력
+      chat.on('chat',function(data){
+        if(data.user === '#{id}'){
+        // me
+          var outgoing_msg = document.createElement('div');
+          outgoing_msg.setAttribute('class', 'outgoing_msg');
+          var sent_msg = document.createElement('div');
+          sent_msg.setAttribute('class','sent_msg');
+          sent_msg.innerHTML = "<p>"+data.chat+"</p><span class='time_date'>"+outputDate(data.createdAt)+"</span>";
+
+          outgoing_msg.appendChild(sent_msg);
+
+          chatLogs.appendChild(outgoing_msg);
+        }else if(data.user === 'system'){
+
+        }else{
+        // you
+          var incoming_msg = document.createElement('div');
+          incoming_msg.setAttribute('class','incoming_msg');
+
+          var incoming_msg_img = document.createElement('div');
+          incoming_msg_img.setAttribute('class','incoming_msg_img');
+
+          var img = document.createElement('img');
+          src = 'https://ptetutorials.com/images/user-profile.png';
+          img.setAttribute('src',src);
+          incoming_msg_img.appendChild(img);
+
+          incoming_msg.appendChild(incoming_msg_img);
+
+          var received_msg = document.createElement('div');
+          received_msg.setAttribute('class','received_msg');
+
+          var received_withd_msg = document.createElement('div');
+          received_withd_msg.setAttribute('class','received_withd_msg');
+          received_withd_msg.innerHTML = "<p>"+data.chat+"</p><span class='time_date'>"+outputDate(data.createdAt)+"</span>";
+
+          received_msg.appendChild(received_withd_msg);
+          incoming_msg.appendChild(received_msg);
+
+          chatLogs.appendChild(incoming_msg);
+
+
+        }
+        var div = document.getElementById("chatLogs");
+        div.scrollTop = div.scrollHeight;
+      });
+
+      var sliders = [].slice.call(document.getElementsByClassName("chat_list"));
+      // 채팅방 조인
+      function addJoinEvent(id){
+
+        var xhr = new XMLHttpRequest();
+        chat.emit('join',{id:id ,user:'#{id}'}); // 사용자 아이디 전송
+
+        xhr.onload = function(){
+          if(xhr.status === 200){
+            var chats = JSON.parse(xhr.responseText);
+
+            // 밑을 옮기기
+            var el = document.querySelector('#chat-form');
+            el.dataset.id = id;
+
+            var chatLogs = document.querySelector('#chatLogs');
+            chatLogs.innerHTML = '';
+            if(chats){
+
+              chats.chats.map(function(chat){
+                if(chat.user === '#{id}'){
+                  var outgoing_msg = document.createElement('div');
+                  outgoing_msg.setAttribute('class', 'outgoing_msg');
+                  var sent_msg = document.createElement('div');
+                  sent_msg.setAttribute('class','sent_msg');
+                  sent_msg.innerHTML = "<p>"+chat.chat+"</p><span class='time_date'>"+outputDate(chat.createdAt)+"</span>";
+                  chatLogs.appendChild(outgoing_msg);
+                  outgoing_msg.appendChild(sent_msg);
+
+
+                  chatLogs.appendChild(outgoing_msg);
+
+
+                }else if(chat.user === 'system'){
+
+                }else{
+                  var incoming_msg = document.createElement('div');
+                  incoming_msg.setAttribute('class','incoming_msg');
+
+                  var incoming_msg_img = document.createElement('div');
+                  incoming_msg_img.setAttribute('class','incoming_msg_img');
+
+                  var img = document.createElement('img');
+                  src = 'https://ptetutorials.com/images/user-profile.png';
+                  img.setAttribute('src',src);
+                  incoming_msg_img.appendChild(img);
+
+                  incoming_msg.appendChild(incoming_msg_img);
+
+                  var received_msg = document.createElement('div');
+                  received_msg.setAttribute('class','received_msg');
+
+                  var received_withd_msg = document.createElement('div');
+                  received_withd_msg.setAttribute('class','received_withd_msg');
+                  received_withd_msg.innerHTML = "<p>"+chat.chat+"</p><span class='time_date'>"+outputDate(chat.createdAt)+"</span>";
+
+                  received_msg.appendChild(received_withd_msg);
+                  incoming_msg.appendChild(received_msg);
+
+                  chatLogs.appendChild(incoming_msg);
+
+
+                }
+
+              });
+
+              var div = document.getElementById("chatLogs");
+              div.scrollTop = div.scrollHeight;
+              // div.scrollTop = div.scrollHeight - div.clientHeight;
+            }
+          }else{
+            console.error(xhr.responseText);
+          }
+        };
+
+        xhr.open('GET','/chat/room/'+id);
+        xhr.send();
+      }
+      // 방 접속
+
+      sliders.forEach(function (e, index){
+
+        e.addEventListener("click", function(){
+
+          addJoinEvent(e.dataset.id);
+          [].forEach.call(document.getElementsByClassName('chat_list'),function(el) {
+             el.classList.remove("active_chat");
+          });
+          e.classList.add('active_chat');
+        });
+      });
+
+      //chating input
+      document.querySelector('#chat-form').addEventListener('submit',function(e){
+
+        e.preventDefault();
+
+        if(e.target.chat.value){
+          var xhr = new XMLHttpRequest();
+          xhr.onload = function(){
+              if(xhr.status === 200){
+                e.target.chat.value = '';
+              }else{
+                console.error(error);
+              }
+          }
+          xhr.open('POST','/chat/room/'+e.target.dataset.id+'/chat');
+          xhr.setRequestHeader('Content-Type','application/json');
+          xhr.send(JSON.stringify({ chat: this.chat.value }));
+        }else{
+          alert('채팅을 입력하세요.');
+        }
+      });
