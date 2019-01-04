@@ -73,6 +73,7 @@ block content
         if(!newTitle){
           return alert('방 제목을 반드시 입력하셔야 합니다.');
         }
+        // a
         var xhr = new XMLHttpRequest();
         xhr.onload = function(){
           var room = JSON.parse(xhr.responseText);
