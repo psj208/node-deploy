@@ -13,11 +13,11 @@ const userSchema = new Schema({
   },
   password: {
     type: String,
-    required: true
+    // required: true
   },
   salt: {
     type: String,
-    required: true
+    // required: true
   },
   provider: {
     type: String,

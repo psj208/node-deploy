@@ -17,20 +17,24 @@ router.get('/',async (req,res,next)=>{
 
 router.post('/room',async (req,res,next)=>{
   try{
-
+    console.log(req.user);
     if(!req.user){
+      console.log(req.user);
       const e = '게스트는 채팅방을 만들 수 없습니다. 로그인해 주세요.';
       res.status(202).json(e);
-    }
-    const room = new Room({
-      title : req.body.title,
-      owner: req.user ?  req.user.user : req.session.color
-    });
 
-    const newRoom = await room.save();
-    // const io = req.app.get('io');
-    // io.of('/room').emit('newRoom',new)
-    res.status(201).json(newRoom);
+    }else{
+      const room = new Room({
+        title : req.body.title,
+        owner: req.user ?  req.user.user : req.session.color
+      });
+
+      const newRoom = await room.save();
+      // const io = req.app.get('io');
+      // io.of('/room').emit('newRoom',new)
+      res.status(201).json(newRoom);
+    }
+
   }catch (error){
     console.error(error);
     next(error);

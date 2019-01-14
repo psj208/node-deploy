@@ -3,7 +3,7 @@ const passport = require('passport');
 // const bkfd2Password = require("pbkdf2-password");
 // const hasher = bkfd2Password();
 const crypto = require('crypto');
-const { isLoggedIn, isNotLoggedIn } = require('./middlewares');
+const { isLoggedIn, isNotLoggedIn,ismodifyed } = require('./middlewares');
 const User = require('../schemas/user');
 
 const router = express.Router();
@@ -38,7 +38,7 @@ router.post('/register',isNotLoggedIn,async (req,res,next)=>{
 
   try{
     const exUser = await User.findOne({ user });
-    
+
     if(exUser){
       req.flash('joinError','이미 가입된 이메일입니다.');
       return res.redirect('/auth/register');
@@ -81,6 +81,17 @@ router.post('/login',isNotLoggedIn,(req,res,next)=>{
   })(req,res,next); //미들웨어 내의 미들웨어는 이걸 붙인다.
   //라우터미들웨어 안에 패스포트 passport.authenticate('local')미들웨어 사용
   //미들웨어에 사용자정의기능을 추가하고싶을때 내부 미들웨어에 (req,res,next) 인자로 제공해서 호출
+});
+router.get('/facebook',ismodifyed,(req,res,next)=>{
+
+  return res.redirect('/');
+})
+router.get('/kakao',passport.authenticate('kakao'));
+
+router.get('/kakao/callback',passport.authenticate('kakao',{
+  failureRedirect : '/',
+}),(req,res)=>{
+  res.redirect('/');
 });
 
 router.get('/logout',isLoggedIn,(req,res)=>{

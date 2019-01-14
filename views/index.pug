@@ -34,8 +34,8 @@ block content
                     h5
                       | #{room.title}
                       span.chat_date #{monthNames[room.createdAt.getMonth()]} #{room.createdAt.getDate()}
-                    p
-                      | 채팅내용
+                    // p
+                       | 채팅내용
 
 
         .mesgs
@@ -108,7 +108,7 @@ block content
             var monthNames = ["January", "February", "March", "April", "May", "June","July", "August", "September", "October", "November", "December"];
             var d = new Date(room.createdAt);
 
-            chat_ib.innerHTML = '<h5>'+newTitle+'<span class="chat_date">'+monthNames[d.getMonth()]+' '+d.getDate()+'</span></h5><p>채팅내용</p>';
+            chat_ib.innerHTML = '<h5>'+newTitle+'<span class="chat_date">'+monthNames[d.getMonth()]+' '+d.getDate()+'</span></h5>';
             chat_people.appendChild(chat_ib);
 
             chat_list.appendChild(chat_people);

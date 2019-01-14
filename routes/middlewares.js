@@ -13,3 +13,7 @@ exports.isNotLoggedIn = (req,res,next)=>{
     res.redirect('/');
   }
 }
+
+exports.ismodifyed = (req,res,next)=>{
+  res.status(403).send('수정중');
+}
