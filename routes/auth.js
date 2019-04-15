@@ -9,14 +9,14 @@ const User = require('../schemas/user');
 const router = express.Router();
 
 /*
-  //등록//
+  //등록 test2
   const chat = new Chat({
     room: req.params.id,
     user: req.session.color, //유저 아이디
     chat: req.body.chat
   });
 
-  await chat.save();
+  await chat.save();s
   //삭제
   await Chat.remove({ _id: req.params.id });
   //select
