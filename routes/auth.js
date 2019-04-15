@@ -9,7 +9,7 @@ const User = require('../schemas/user');
 const router = express.Router();
 
 /*
-  //등록 test4
+  //등록 test411
   const chat = new Chat({
     room: req.params.id,
     user: req.session.color, //유저 아이디
